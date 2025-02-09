@@ -1,9 +1,21 @@
-install Node.js
+1. Install ExpoGo on your mobile device
 
-create folder
+2. install Node.js
 
+3. create folder GoPlayMobile
 
+4. git pull repository
 
-in the terminal copy/paste+enter
+5. Open in VSCode
 
-npx create-expo-app@latest
+6. install these dependencies
+
+7. npm install @react-navigation/stack
+
+8. npm install react-native-maps
+
+9. make sure terminal is opened in the project folder
+
+10. run "npx expo start"
+
+11. get codin'
