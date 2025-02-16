@@ -1,6 +1,8 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import MapView from "react-native-maps";
+import React, { useRef } from "react";
+import { StyleSheet, Text, View, FlatList, Dimensions } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 const INITIAL_REGION = {
   latitude: 46.8721,
@@ -9,37 +11,93 @@ const INITIAL_REGION = {
   longitudeDelta: 4,
 };
 
+const LOCATIONS = [
+  { id: '1', name: 'Rudy\'s Poetry Contest', latitude: 46.8624, longitude: -114.0160 },
+  { id: '2', name: 'Shut Your Pie Hole - Eating Contest', latitude: 46.8749, longitude: -113.9925 },
+  { id: '3', name: 'Union Club - Open Mic Nite', latitude: 46.8708, longitude: -113.9925 },
+];
+
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
 const Master = () => {
+  const translateY = useSharedValue(0);
+
+  interface GestureHandlerEvent {
+    nativeEvent: {
+      state: number;
+      translationY: number;
+    };
+  }
+
+  const gestureHandler = (event: GestureHandlerEvent) => {
+    if (event.nativeEvent.state === State.END) {
+      if (event.nativeEvent.translationY < -50) {
+        translateY.value = withSpring(-SCREEN_HEIGHT + 100); // Fullscreen list
+      } else if (event.nativeEvent.translationY > 50) {
+        translateY.value = withSpring(0); // Half map and half list
+      } else {
+        translateY.value = withSpring(-SCREEN_HEIGHT / 2 + 100); // Fullscreen map
+      }
+    }
+  };
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+    };
+  });
+
   return (
     <View style={styles.screen}>
-      <View style={styles.container}>
-        <MapView style={styles.map} initialRegion={INITIAL_REGION} />
-        <Text style={styles.mainText}>Welcome to Missoula</Text>
-      </View>
+      <MapView style={styles.map} initialRegion={INITIAL_REGION}>
+        {LOCATIONS.map(location => (
+          <Marker
+            key={location.id}
+            coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+            title={location.name}
+          />
+        ))}
+      </MapView>
+      <PanGestureHandler onHandlerStateChange={gestureHandler}>
+        <Animated.View style={[styles.listContainer, animatedStyle]}>
+          <FlatList
+            data={LOCATIONS}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <Text style={styles.locationText}>{item.name}</Text>
+            )}
+          />
+        </Animated.View>
+      </PanGestureHandler>
     </View>
   );
 };
 
-export default Master; // ✅ No navigation container needed
+export default Master;
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#fff",
   },
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mainText: {
-    fontFamily: "Futura Heavy font",
-    fontSize: 30,
-    color: "#652e10",
-    marginBottom: 10,
-  },
   map: {
-    width: "100%",
-    height: "50%",
+    ...StyleSheet.absoluteFillObject,
+  },
+  listContainer: {
+    position: "absolute",
+    top: SCREEN_HEIGHT / 2,
+    left: 0,
+    right: 0,
+    height: SCREEN_HEIGHT,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+  },
+  locationText: {
+    fontSize: 18,
+    color: "#333",
+    marginTop: 5,
+    paddingHorizontal: 20,
   },
 });
