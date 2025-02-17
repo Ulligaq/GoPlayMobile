@@ -16,8 +16,8 @@
 
 9. make sure terminal is opened in the project folder
 
-10. run "npx expo start"
+10. run "npm install react-native-gesture-handler react-native-reanimated"
 
-11. run "npm install react-native-gesture-handler react-native-reanimated"
+11. run "npx expo start"
 
 12. get codin'
