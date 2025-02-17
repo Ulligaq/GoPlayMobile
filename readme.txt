@@ -18,4 +18,6 @@
 
 10. run "npx expo start"
 
-11. get codin'
+11. run "npm install react-native-gesture-handler react-native-reanimated"
+
+12. get codin'
