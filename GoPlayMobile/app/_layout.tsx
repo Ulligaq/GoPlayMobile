@@ -4,6 +4,7 @@ import TopBottomBars from "./topbottombars";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import GestureHandlerWrapper from "./GestureHandlerWrapper";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -23,17 +24,19 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topBarContainer}>
-        <TopBottomBars position="top" />
+    <GestureHandlerWrapper>
+      <View style={styles.container}>
+        <View style={styles.topBarContainer}>
+          <TopBottomBars position="top" />
+        </View>
+        <View style={styles.content}>
+          <Stack screenOptions={{ headerShown: false }} />
+        </View>
+        <View style={styles.bottomBarContainer}>
+          <TopBottomBars position="bottom" />
+        </View>
       </View>
-      <View style={styles.content}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </View>
-      <View style={styles.bottomBarContainer}>
-        <TopBottomBars position="bottom" />
-      </View>
-    </View>
+    </GestureHandlerWrapper>
   );
 }
 
