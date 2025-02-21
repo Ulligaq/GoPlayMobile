@@ -6,7 +6,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
 export default function RootLayout() {
-  // ✅ Load custom fonts
   const [fontsLoaded] = useFonts({
     "Futura-Heavy": require("../assets/fonts/Futura Heavy font.ttf"),
     "Futura-Medium": require("../assets/fonts/futura medium bt.ttf"),
@@ -20,7 +19,7 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null; // ✅ Prevent rendering before fonts load
+    return null; 
   }
 
   return (
@@ -40,15 +39,15 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // ✅ Ensures the whole screen is used
+    flex: 1, 
   },
   topBarContainer: {
-    height: 50, // ✅ Exact height of the top bar
+    height: 50, 
   },
   content: {
-    flex: 1, // ✅ Ensures this fills all remaining space (NO BLACK BARS)
+    flex: 1,
   },
   bottomBarContainer: {
-    height: 50, // ✅ Exact height of the bottom bar
+    height: 50,
   },
 });

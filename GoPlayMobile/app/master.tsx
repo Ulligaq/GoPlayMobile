@@ -20,7 +20,7 @@ const Master = () => {
   );
 };
 
-export default Master; // ✅ No navigation container needed
+export default Master;
 
 const styles = StyleSheet.create({
   screen: {
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   mainText: {
-    fontFamily: "Futura Heavy font",
+    fontFamily: "Futura-Heavy",
     fontSize: 30,
     color: "#652e10",
     marginBottom: 10,
