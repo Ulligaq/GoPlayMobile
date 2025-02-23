@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { StyleSheet, Text, View, FlatList, Dimensions } from "react-native";
+import { StyleSheet, Text, View, FlatList, Dimensions, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
@@ -20,6 +20,7 @@ const LOCATIONS = [
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 const Master = () => {
+  const mapRef = useRef<MapView>(null);
   const translateY = useSharedValue(0);
 
   interface GestureHandlerEvent {
@@ -47,9 +48,25 @@ const Master = () => {
     };
   });
 
+  interface Location {
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+  }
+
+  const handlePress = (location: Location) => {
+    mapRef.current?.animateToRegion({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    });
+  };
+
   return (
     <View style={styles.screen}>
-      <MapView style={styles.map} initialRegion={INITIAL_REGION}>
+      <MapView ref={mapRef} style={styles.map} initialRegion={INITIAL_REGION}>
         {LOCATIONS.map(location => (
           <Marker
             key={location.id}
@@ -64,7 +81,9 @@ const Master = () => {
             data={LOCATIONS}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <Text style={styles.locationText}>{item.name}</Text>
+              <TouchableOpacity onPress={() => handlePress(item)}>
+                <Text style={styles.locationText}>{item.name}</Text>
+              </TouchableOpacity>
             )}
           />
         </Animated.View>
