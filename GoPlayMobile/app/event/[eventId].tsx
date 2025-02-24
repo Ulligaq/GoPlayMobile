@@ -19,7 +19,7 @@ const eventDetails: EventDetails = {
     description: "Join us to see who can tackle the most slices of our delicious pizza pies. You never lose with great pizza, but the best eater gets free slices for a year!",
   },
   '3': {
-    title: "Open Mic Nite at the Union Club Bar & Grill",
+    title: "Union Club Bar & Grill: Open Mic Nite",
     description: "Calling all local talent for a fun-filled evening at the Union Club's Open Mic Nite. All talents welcome, so let's sing and dance the night away!",
   },
 };

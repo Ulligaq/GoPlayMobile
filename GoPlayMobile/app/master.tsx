@@ -15,7 +15,7 @@ const INITIAL_REGION = {
 const LOCATIONS = [
   { id: '1', name: 'Rudy\'s Poetry Contest', latitude: 46.8624, longitude: -114.0160 },
   { id: '2', name: 'Shut Your Pie Hole (Eating Contest)', latitude: 46.8749, longitude: -113.9925 },
-  { id: '3', name: 'Open Mic Nite at the Union Club Bar & Grill', latitude: 46.8708, longitude: -113.9925 },
+  { id: '3', name: 'Union Club Bar & Grill: Open Mic Nite', latitude: 46.8708, longitude: -113.9925 },
 ];
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -88,7 +88,7 @@ const Master = () => {
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
               <View style={styles.listItem}>
-                <TouchableOpacity onPress={() => handlePress(item)}>
+                <TouchableOpacity onPress={() => handlePress(item)} style={styles.textContainer}>
                   <Text style={styles.locationText}>{item.name}</Text>
                 </TouchableOpacity>
                 <Button title="More Info" onPress={() => handleMoreInfo(item.id)} />
@@ -128,6 +128,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 10,
+  },
+  textContainer: {
+    flex: 1,
+    marginRight: 10,
   },
   locationText: {
     fontSize: 18,
