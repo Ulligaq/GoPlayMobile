@@ -1,8 +1,9 @@
 import React, { useRef } from "react";
-import { StyleSheet, Text, View, FlatList, Dimensions, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, FlatList, Dimensions, TouchableOpacity, Button } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { useRouter } from "expo-router";
 
 const INITIAL_REGION = {
   latitude: 46.8721,
@@ -13,8 +14,8 @@ const INITIAL_REGION = {
 
 const LOCATIONS = [
   { id: '1', name: 'Rudy\'s Poetry Contest', latitude: 46.8624, longitude: -114.0160 },
-  { id: '2', name: 'Shut Your Pie Hole - Eating Contest', latitude: 46.8749, longitude: -113.9925 },
-  { id: '3', name: 'Union Club - Open Mic Nite', latitude: 46.8708, longitude: -113.9925 },
+  { id: '2', name: 'Shut Your Pie Hole (Eating Contest)', latitude: 46.8749, longitude: -113.9925 },
+  { id: '3', name: 'Open Mic Nite at the Union Club Bar & Grill', latitude: 46.8708, longitude: -113.9925 },
 ];
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -22,6 +23,7 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 const Master = () => {
   const mapRef = useRef<MapView>(null);
   const translateY = useSharedValue(0);
+  const router = useRouter();
 
   interface GestureHandlerEvent {
     nativeEvent: {
@@ -64,6 +66,10 @@ const Master = () => {
     });
   };
 
+  const handleMoreInfo = (locationId: string) => {
+    router.push(`/event/${locationId}`);
+  };
+
   return (
     <View style={styles.screen}>
       <MapView ref={mapRef} style={styles.map} initialRegion={INITIAL_REGION}>
@@ -81,9 +87,12 @@ const Master = () => {
             data={LOCATIONS}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => handlePress(item)}>
-                <Text style={styles.locationText}>{item.name}</Text>
-              </TouchableOpacity>
+              <View style={styles.listItem}>
+                <TouchableOpacity onPress={() => handlePress(item)}>
+                  <Text style={styles.locationText}>{item.name}</Text>
+                </TouchableOpacity>
+                <Button title="More Info" onPress={() => handleMoreInfo(item.id)} />
+              </View>
             )}
           />
         </Animated.View>
@@ -113,10 +122,15 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingTop: 20,
   },
+  listItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   locationText: {
     fontSize: 18,
     color: "#333",
-    marginTop: 5,
-    paddingHorizontal: 20,
   },
 });
