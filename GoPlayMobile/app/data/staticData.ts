@@ -9,3 +9,4 @@ export const golPlayColors = {
   medGold: "D89827",
   lightGold: "E2A747"
 };
+export default golPlayColors;

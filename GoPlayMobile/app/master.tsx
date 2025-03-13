@@ -1,9 +1,17 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { StyleSheet, Text, View, FlatList, Dimensions, TouchableOpacity, Button } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps"; // Remove Callout import
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useRouter } from "expo-router";
+import GeoModalComponent from "./components/geoModalComponent"; // Import GeoModalComponent
+
+interface Location {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+}
 
 const INITIAL_REGION = {
   latitude: 46.8721,
@@ -24,6 +32,7 @@ const Master = () => {
   const mapRef = useRef<MapView>(null);
   const translateY = useSharedValue(0);
   const router = useRouter();
+  const [location, setLocation] = useState<Location | null>(null); // Initialize location as null
 
   interface GestureHandlerEvent {
     nativeEvent: {
@@ -50,13 +59,6 @@ const Master = () => {
     };
   });
 
-  interface Location {
-    id: string;
-    name: string;
-    latitude: number;
-    longitude: number;
-  }
-
   const handlePress = (location: Location) => {
     mapRef.current?.animateToRegion({
       latitude: location.latitude,
@@ -64,10 +66,15 @@ const Master = () => {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     });
+    setLocation(location); // Set location when a pin is tapped
   };
 
   const handleMoreInfo = (locationId: string) => {
     router.push(`/event/${locationId}`);
+  };
+
+  const handleCloseModal = () => {
+    setLocation(null); // Reset location when modal is closed
   };
 
   return (
@@ -78,6 +85,7 @@ const Master = () => {
             key={location.id}
             coordinate={{ latitude: location.latitude, longitude: location.longitude }}
             title={location.name}
+            onPress={() => handlePress(location)} // Handle marker press
           />
         ))}
       </MapView>
@@ -97,6 +105,14 @@ const Master = () => {
           />
         </Animated.View>
       </PanGestureHandler>
+      {location && (
+        <View style={styles.modalContainer}>
+          <GeoModalComponent
+            location={location}
+            onClose={handleCloseModal} // Close modal
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -136,5 +152,14 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 18,
     color: "#333",
+  },
+  modalContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

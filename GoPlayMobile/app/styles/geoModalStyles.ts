@@ -27,6 +27,20 @@ export const geoModalStyles = StyleSheet.create({
     color: "blue",
     marginBottom: 20,
   },
+  button: {
+    backgroundColor: 'white',
+    borderColor: `#${golPlayColors.medAqua}`, // Use the dark aqua color directly
+    borderWidth: 2,
+    borderRadius: 25, // Fully rounded (pill) style
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#00796B', // Use the dark aqua color directly
+    fontWeight: 'bold',
+  },
 });
 
 export default geoModalStyles;
