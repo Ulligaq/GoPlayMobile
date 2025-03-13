@@ -119,6 +119,8 @@ const Master = () => {
 
 export default Master;
 
+
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
