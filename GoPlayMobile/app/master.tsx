@@ -1,14 +1,16 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { StyleSheet, Text, View, FlatList, Dimensions, TouchableOpacity, Button } from "react-native";
-import MapView, { Marker } from "react-native-maps"; // Remove Callout import
+import MapView, { Marker } from "react-native-maps";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useRouter } from "expo-router";
-import GeoModalComponent from "./components/geoModalComponent"; // Import GeoModalComponent
+import { db } from "./firebaseConfig"; // Adjust path as needed
+import { collection, getDocs } from "firebase/firestore";
+import GeoModalComponent from "./components/geoModalComponent";
 
-interface Location {
+interface Event {
   id: string;
-  name: string;
+  EventName: string;
   latitude: number;
   longitude: number;
 }
@@ -20,19 +22,32 @@ const INITIAL_REGION = {
   longitudeDelta: 4,
 };
 
-const LOCATIONS = [
-  { id: '1', name: 'Rudy\'s Poetry Contest', latitude: 46.8624, longitude: -114.0160 },
-  { id: '2', name: 'Shut Your Pie Hole (Eating Contest)', latitude: 46.8749, longitude: -113.9925 },
-  { id: '3', name: 'Union Club Bar & Grill: Open Mic Nite', latitude: 46.8708, longitude: -113.9925 },
-];
-
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 const Master = () => {
   const mapRef = useRef<MapView>(null);
+  const [events, setEvents] = useState<Event[]>([]);
   const translateY = useSharedValue(0);
   const router = useRouter();
-  const [location, setLocation] = useState<Location | null>(null); // Initialize location as null
+  const [location, setLocation] = useState<Event | null>(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Events"));
+        const eventData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          EventName: doc.data().EventName,
+          latitude: doc.data().Latitude,
+          longitude: doc.data().Longitude,
+        }));
+        setEvents(eventData);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   interface GestureHandlerEvent {
     nativeEvent: {
@@ -44,11 +59,11 @@ const Master = () => {
   const gestureHandler = (event: GestureHandlerEvent) => {
     if (event.nativeEvent.state === State.END) {
       if (event.nativeEvent.translationY < -50) {
-        translateY.value = withSpring(-SCREEN_HEIGHT + 100); // Fullscreen list
+        translateY.value = withSpring(-SCREEN_HEIGHT + 100);
       } else if (event.nativeEvent.translationY > 50) {
-        translateY.value = withSpring(0); // Half map and half list
+        translateY.value = withSpring(0);
       } else {
-        translateY.value = withSpring(-SCREEN_HEIGHT / 2 + 100); // Fullscreen map
+        translateY.value = withSpring(-SCREEN_HEIGHT / 2 + 100);
       }
     }
   };
@@ -59,45 +74,45 @@ const Master = () => {
     };
   });
 
-  const handlePress = (location: Location) => {
+  const handlePress = (event: Event) => {
     mapRef.current?.animateToRegion({
-      latitude: location.latitude,
-      longitude: location.longitude,
+      latitude: event.latitude,
+      longitude: event.longitude,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     });
-    setLocation(location); // Set location when a pin is tapped
+    setLocation(event);
   };
 
-  const handleMoreInfo = (locationId: string) => {
-    router.push(`/event/${locationId}`);
+  const handleMoreInfo = (eventId: string) => {
+    router.push(`/event/${eventId}`);
   };
 
   const handleCloseModal = () => {
-    setLocation(null); // Reset location when modal is closed
+    setLocation(null);
   };
 
   return (
     <View style={styles.screen}>
       <MapView ref={mapRef} style={styles.map} initialRegion={INITIAL_REGION}>
-        {LOCATIONS.map(location => (
+        {events.map(event => (
           <Marker
-            key={location.id}
-            coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-            title={location.name}
-            onPress={() => handlePress(location)} // Handle marker press
+            key={event.id}
+            coordinate={{ latitude: event.latitude, longitude: event.longitude }}
+            title={event.EventName}
+            onPress={() => handlePress(event)}
           />
         ))}
       </MapView>
       <PanGestureHandler onHandlerStateChange={gestureHandler}>
         <Animated.View style={[styles.listContainer, animatedStyle]}>
           <FlatList
-            data={LOCATIONS}
+            data={events}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
               <View style={styles.listItem}>
                 <TouchableOpacity onPress={() => handlePress(item)} style={styles.textContainer}>
-                  <Text style={styles.locationText}>{item.name}</Text>
+                  <Text style={styles.locationText}>{item.EventName}</Text>
                 </TouchableOpacity>
                 <Button title="More Info" onPress={() => handleMoreInfo(item.id)} />
               </View>
@@ -107,10 +122,7 @@ const Master = () => {
       </PanGestureHandler>
       {location && (
         <View style={styles.modalContainer}>
-          <GeoModalComponent
-            location={location}
-            onClose={handleCloseModal} // Close modal
-          />
+          <GeoModalComponent location={location} onClose={handleCloseModal} />
         </View>
       )}
     </View>
