@@ -70,24 +70,6 @@ const Master = () => {
     };
   });
 
-  const handlePress = (location: Location) => {
-    mapRef.current?.animateToRegion({
-      latitude: location.latitude,
-      longitude: location.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    });
-    setLocation(location); // Set location when a pin is tapped
-  };
-
-  const handleMoreInfo = (locationId: string) => {
-    router.push(`/event/${locationId}`);
-  };
-
-  const handleCloseModal = () => {
-    setLocation(null); // Reset location when modal is closed
-  };
-
   return (
     <View style={styles.screen}>
       <MapView style={styles.map} initialRegion={INITIAL_REGION}>
@@ -110,21 +92,11 @@ const Master = () => {
           />
         </Animated.View>
       </PanGestureHandler>
-      {location && (
-        <View style={styles.modalContainer}>
-          <GeoModalComponent
-            location={location}
-            onClose={handleCloseModal} // Close modal
-          />
-        </View>
-      )}
     </View>
   );
 };
 
 export default Master;
-
-
 
 const styles = StyleSheet.create({
   screen: {
@@ -145,28 +117,10 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingTop: 20,
   },
-  listItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  textContainer: {
-    flex: 1,
-    marginRight: 10,
-  },
   locationText: {
     fontSize: 18,
     color: "#333",
-  },
-  modalContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
+    marginTop: 5,
+    paddingHorizontal: 20,
   },
 });
