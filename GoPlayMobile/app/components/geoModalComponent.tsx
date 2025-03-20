@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Modal, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import geoModalStyles from "../styles/geoModalStyles"; // Correct import statement
+import geoModalStyles from "../styles/geoModalStyles"; 
 
 interface Location {
   id: string;
@@ -15,6 +15,13 @@ interface GeoModalComponentProps {
   onClose: () => void;
 }
 
+/**
+ * GeoModalComponent displays a modal with event details when a map marker is tapped.
+ * @param {GeoModalComponentProps} props - The properties for the component.
+ * @param {Location | null} props.location - The location object containing event details.
+ * @param {() => void} props.onClose - Function to close the modal.
+ * @returns {JSX.Element} The rendered component.
+ */
 const GeoModalComponent: React.FC<GeoModalComponentProps> = ({ location, onClose }) => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false); // Initialize as false
@@ -27,11 +34,19 @@ const GeoModalComponent: React.FC<GeoModalComponentProps> = ({ location, onClose
     }
   }, [location]);
 
+  /**
+   * Handle the "I'm Interested!" button press.
+   * Closes the modal and navigates to the event details page.
+   */
   const handleInterested = () => {
     onClose(); // Close the modal
     router.push(`/event/${location?.id}`); // Open event details
   };
 
+  /**
+   * Handle the close button press.
+   * Closes the modal.
+   */
   const handleClose = () => {
     setIsVisible(false);
     onClose();
