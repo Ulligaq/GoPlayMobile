@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, FlatList, Dimensions } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { StyleSheet, Text, View, FlatList, Dimensions, TouchableOpacity, Button } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { useRouter } from "expo-router";
 import { db } from "./firebaseConfig"; // Adjust path as needed
 import { collection, getDocs } from "firebase/firestore";
+import GeoModalComponent from "./components/geoModalComponent";
+
+interface Event {
+  id: string;
+  EventName: string;
+  latitude: number;
+  longitude: number;
+}
 
 const INITIAL_REGION = {
   latitude: 46.8721,
@@ -15,18 +24,13 @@ const INITIAL_REGION = {
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-interface Event {
-  id: string;
-  EventName: string;
-  latitude: number;
-  longitude: number;
-}
-
 const Master = () => {
+  const mapRef = useRef<MapView>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const translateY = useSharedValue(0);
+  const router = useRouter();
+  const [location, setLocation] = useState<Event | null>(null);
 
-  // Fetch Firestore data
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -55,11 +59,11 @@ const Master = () => {
   const gestureHandler = (event: GestureHandlerEvent) => {
     if (event.nativeEvent.state === State.END) {
       if (event.nativeEvent.translationY < -50) {
-        translateY.value = withSpring(-SCREEN_HEIGHT + 100); // Fullscreen list
+        translateY.value = withSpring(-SCREEN_HEIGHT + 100);
       } else if (event.nativeEvent.translationY > 50) {
-        translateY.value = withSpring(0); // Half map and half list
+        translateY.value = withSpring(0);
       } else {
-        translateY.value = withSpring(-SCREEN_HEIGHT / 2 + 100); // Fullscreen map
+        translateY.value = withSpring(-SCREEN_HEIGHT / 2 + 100);
       }
     }
   };
@@ -70,14 +74,33 @@ const Master = () => {
     };
   });
 
+  const handlePress = (event: Event) => {
+    mapRef.current?.animateToRegion({
+      latitude: event.latitude,
+      longitude: event.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    });
+    setLocation(event);
+  };
+
+  const handleMoreInfo = (eventId: string) => {
+    router.push(`/event/${eventId}`);
+  };
+
+  const handleCloseModal = () => {
+    setLocation(null);
+  };
+
   return (
     <View style={styles.screen}>
-      <MapView style={styles.map} initialRegion={INITIAL_REGION}>
+      <MapView ref={mapRef} style={styles.map} initialRegion={INITIAL_REGION}>
         {events.map(event => (
           <Marker
             key={event.id}
             coordinate={{ latitude: event.latitude, longitude: event.longitude }}
             title={event.EventName}
+            onPress={() => handlePress(event)}
           />
         ))}
       </MapView>
@@ -87,11 +110,21 @@ const Master = () => {
             data={events}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <Text style={styles.locationText}>{item.EventName}</Text>
+              <View style={styles.listItem}>
+                <TouchableOpacity onPress={() => handlePress(item)} style={styles.textContainer}>
+                  <Text style={styles.locationText}>{item.EventName}</Text>
+                </TouchableOpacity>
+                <Button title="More Info" onPress={() => handleMoreInfo(item.id)} />
+              </View>
             )}
           />
         </Animated.View>
       </PanGestureHandler>
+      {location && (
+        <View style={styles.modalContainer}>
+          <GeoModalComponent location={location} onClose={handleCloseModal} />
+        </View>
+      )}
     </View>
   );
 };
@@ -117,10 +150,28 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingTop: 20,
   },
+  listItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  textContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
   locationText: {
     fontSize: 18,
     color: "#333",
-    marginTop: 5,
-    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
