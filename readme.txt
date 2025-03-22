@@ -21,3 +21,5 @@
 11. run "npx expo start"
 
 12. get codin'
+
+13. *New dependencies have been added! Make sure to run "npm install" after pulling from Dev

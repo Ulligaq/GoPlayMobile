@@ -32,10 +32,16 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "firebase": {
+        "projectId": "goplay-admin-c5e1e"
+      }
     }
   }
 }

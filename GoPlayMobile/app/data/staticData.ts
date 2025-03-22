@@ -9,4 +9,10 @@ export const golPlayColors = {
   medGold: "D89827",
   lightGold: "E2A747"
 };
+
+export const AttendanceTypes = {
+  GOING: 1,
+  INTERESTED: 2,
+};
+
 export default golPlayColors;
