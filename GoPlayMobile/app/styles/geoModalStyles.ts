@@ -41,6 +41,24 @@ export const geoModalStyles = StyleSheet.create({
     color: '#00796B', // Use the dark aqua color directly
     fontWeight: 'bold',
   },
+
+  image: {
+    width: "100%",
+    height: 180,
+    borderRadius: 10,
+    marginVertical: 10,
+  },
+  description: {
+    fontSize: 15,
+    marginBottom: 10,
+    color: "#444",
+  },
+  address: {
+    fontSize: 14,
+    marginBottom: 10,
+    color: "#666",
+    fontStyle: "italic",
+  },
 });
 
 export default geoModalStyles;

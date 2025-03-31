@@ -1,17 +1,29 @@
 import { collection, doc, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig"; // Use shared db
+import { db } from "../firebaseConfig";
 
 // Define the Event type
 export interface Event {
-  EventID: number; // Unique identifier for the event
-  EventName: string; // Name of the event
-  Latitude: number; // Latitude of the event location
-  Longitude: number; // Longitude of the event location
+  EventID: number;
+  EventName: string;
+  EventType: string;
+  EventDescription: string;
+  EventDateTime: string;
+  Address: string;
+  Latitude: number;
+  Longitude: number;
+  Approval: boolean;
+  AttendanceCount: number;
+  AdvertiserID: string;
+  AgeRange: string;
+  SoberFriendly: boolean;
+  PrimaryImage: string;
+  SecondaryImages: string[];
+  RejectionReason: string;
 }
 
 // Repository to manage event data
 export class EventsRepository {
-  private collectionRef = collection(db, "Events"); // Use shared db
+  private collectionRef = collection(db, "Events");
 
   // Fetch all events from the Firestore collection
   async getAllEvents(): Promise<Event[]> {
