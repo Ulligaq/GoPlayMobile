@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore"; 
 import secrets from "../secrets.json";
 
 console.log("🔥 Firebase Project ID:", secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID);

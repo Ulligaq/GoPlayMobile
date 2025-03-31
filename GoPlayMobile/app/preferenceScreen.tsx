@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, Switch, StyleSheet } from "react-native";
+import { View, Text, FlatList, Switch, StyleSheet, TouchableOpacity } from "react-native";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import masterStyles from "./styles/masterStyles"; // Use your styling system
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import masterStyles from "./styles/masterStyles";
 
 interface EventType {
   EventTypeId: number;
@@ -12,20 +14,29 @@ interface EventType {
 const PreferencesScreen = () => {
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEventTypes = async () => {
-      const db = getFirestore();
-      const snapshot = await getDocs(collection(db, "EventType"));
-      const types = snapshot.docs.map((doc) => doc.data() as EventType);
-      setEventTypes(types);
+      try {
+        const db = getFirestore();
+        const snapshot = await getDocs(collection(db, "EventType"));
+        const types = snapshot.docs.map(doc => doc.data() as EventType);
+        types.sort((a, b) => a.EventType.localeCompare(b.EventType));
+        setEventTypes(types);
+      } catch (error) {
+        console.error("Error fetching event types:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-
+  
     const loadPreferences = async () => {
       const stored = await AsyncStorage.getItem("preferredEventTypes");
       if (stored) setSelectedTypes(JSON.parse(stored));
     };
-
+  
     fetchEventTypes();
     loadPreferences();
   }, []);
@@ -40,9 +51,20 @@ const PreferencesScreen = () => {
     setSelectedTypes(updated);
     await AsyncStorage.setItem("preferredEventTypes", JSON.stringify(updated));
   };
-
+  if (loading) {
+    return (
+      <View style={masterStyles.screen}>
+        <Text>Loading preferences...</Text>
+      </View>
+    );
+  }
   return (
     <View style={masterStyles.screen}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color="#333" />
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.header}>Select Preferred Event Types</Text>
       <FlatList
         data={eventTypes}
@@ -64,6 +86,16 @@ const PreferencesScreen = () => {
 export default PreferencesScreen;
 
 const styles = StyleSheet.create({
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  backText: {
+    fontSize: 16,
+    marginLeft: 5,
+    color: "#333",
+  },
   header: {
     fontSize: 18,
     fontWeight: "bold",

@@ -5,11 +5,13 @@ import MapView, { Marker } from "react-native-maps";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from '@react-navigation/native';
 import GeoModalComponent from "./components/geoModalComponent";
 import { EventsRepository, Event } from "./data/EventsRepository"; // Import Event from EventsRepository
 import { getDeviceId } from "./utils/getDeviceId";
 import { ParticipantRepository, ParticipantFactory } from "./data/ParticipantRepository";
 import masterStyles from "./styles/masterStyles"; // Import styles
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the initial region for the map
 const INITIAL_REGION = {
@@ -37,6 +39,12 @@ const Master = () => {
 
   // State to store the currently selected event
   const [event, setEvent] = useState<Event | null>(null);
+
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+
+  const filteredEvents = events.filter(event =>
+    selectedTypes.length === 0 || selectedTypes.includes(event.EventType)
+  );
 
   
   // Define the structure of the gesture handler event
@@ -68,13 +76,11 @@ const Master = () => {
         const deviceId = await getDeviceId();
         const participantRepo = new ParticipantRepository();
         const existingParticipant = await participantRepo.getParticipant(deviceId);
-
+  
         if (!existingParticipant) {
           console.log("Device ID saved locally:", deviceId);
-          const participantRepo = new ParticipantRepository();
-          const newParticipant = ParticipantFactory.createParticipant(deviceId, ""); // Replace "" with appropriate mid if available
-          await participantRepo.addParticipant(newParticipant); // Save deviceId to ParticipantRepo
-
+          const newParticipant = ParticipantFactory.createParticipant(deviceId, "");
+          await participantRepo.addParticipant(newParticipant);
         } else {
           console.log("Device ID exists in Firebase:", deviceId);
         }
@@ -82,10 +88,27 @@ const Master = () => {
         console.error("Error initializing deviceId:", error);
       }
     };
-
+  
     initializeDeviceId();
-  }, []);
+    });
 
+    useFocusEffect(
+      React.useCallback(() => {
+        const loadPreferences = async () => {
+          try {
+            const stored = await AsyncStorage.getItem("preferredEventTypes");
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              setSelectedTypes(parsed);
+            }
+          } catch (error) {
+            console.error("Error loading preferences:", error);
+          }
+        };
+    
+        loadPreferences();
+      }, [])
+    );
 
   // Handle gestures for the animated list container
   const gestureHandler = (event: GestureHandlerEvent) => {
@@ -138,7 +161,7 @@ const Master = () => {
     <View style={masterStyles.screen}>
       {/* MapView to display events as markers */}
       <MapView ref={mapRef} style={masterStyles.map} initialRegion={INITIAL_REGION}>
-        {events.map(event => (
+        {filteredEvents.map(event => (
           <Marker
             key={event.EventID}
             coordinate={{ latitude: event.Latitude, longitude: event.Longitude }}
@@ -153,7 +176,7 @@ const Master = () => {
         <Animated.View style={[masterStyles.listContainer, animatedStyle]}>
           {/* FlatList to display the list of events */}
           <FlatList
-            data={events}
+            data={filteredEvents}
             keyExtractor={item => item.EventID.toString()}
             renderItem={({ item }) => (
               <View style={masterStyles.listItem}>

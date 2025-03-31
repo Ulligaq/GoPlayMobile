@@ -1,34 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Modal, TouchableOpacity } from "react-native";
+import { View, Text, Modal, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
-import geoModalStyles from "../styles/geoModalStyles"; 
+import geoModalStyles from "../styles/geoModalStyles";
 import { ParticipantEventRepository, ParticipantEventFactory } from "../data/ParticipantEventRepository";
-import { Event } from "../data/EventsRepository"; // Ensure Event is imported from EventsRepository
-import { AttendanceTypes } from "../data/staticData"; // Import AttendanceTypes
-import { getDeviceId } from "../utils/getDeviceId"; // Import getDeviceId
+import { Event } from "../data/EventsRepository";
+import { AttendanceTypes } from "../data/staticData";
+import { getDeviceId } from "../utils/getDeviceId";
 
 interface GeoModalComponentProps {
   event: Event | null;
   onClose: () => void;
 }
 
-/**
- * GeoModalComponent displays a modal with event details when a map marker is tapped.
- */
 const GeoModalComponent: React.FC<GeoModalComponentProps> = ({ event, onClose }) => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (event) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
+    setIsVisible(!!event);
   }, [event]);
 
   const handleInterested = async () => {
-    const deviceId = await getDeviceId(); // Get deviceId directly
+    const deviceId = await getDeviceId();
     if (!deviceId) {
       console.error("Device ID is not available. Error code #101.");
       return;
@@ -36,7 +29,6 @@ const GeoModalComponent: React.FC<GeoModalComponentProps> = ({ event, onClose })
 
     const participantEventRepo = new ParticipantEventRepository();
 
-    // Save AttendanceState as "2" (Interested) in ParticipantEvent
     if (event) {
       const newParticipantEvent = ParticipantEventFactory.createParticipantEvent(
         deviceId,
@@ -47,9 +39,13 @@ const GeoModalComponent: React.FC<GeoModalComponentProps> = ({ event, onClose })
     }
 
     onClose();
+  };
+
+  const handleMoreInfo = () => {
+    onClose();
     router.push({
       pathname: "/event/[eventId]",
-      params: { eventId: event?.EventID ?? "", event: event ? JSON.stringify(event) : null }, // Pass eventId and the stringified Event object
+      params: { eventId: event?.EventID ?? "", event: event ? JSON.stringify(event) : null },
     });
   };
 
@@ -62,10 +58,33 @@ const GeoModalComponent: React.FC<GeoModalComponentProps> = ({ event, onClose })
     >
       <View style={geoModalStyles.modalContainer}>
         <View style={geoModalStyles.modalContent}>
-          <Text style={geoModalStyles.title}>{event?.EventName}</Text>        
+          {/* Event Title */}
+          <Text style={geoModalStyles.title}>{event?.EventName}</Text>
+
+          {/* Primary Image */}
+          {event?.PrimaryImage && (
+            <Image source={{ uri: event.PrimaryImage }} style={geoModalStyles.image} />
+          )}
+
+          {/* Description */}
+          {event?.EventDescription && (
+            <Text style={geoModalStyles.description}>{event.EventDescription}</Text>
+          )}
+
+          {/* Address */}
+          {event?.Address && (
+            <Text style={geoModalStyles.address}>📍 {event.Address}</Text>
+          )}
+
+          {/* Buttons */}
           <TouchableOpacity style={geoModalStyles.button} onPress={handleInterested}>
             <Text style={geoModalStyles.buttonText}>I'm Interested!</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={geoModalStyles.button} onPress={handleMoreInfo}>
+            <Text style={geoModalStyles.buttonText}>More Info</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={geoModalStyles.button} onPress={onClose}>
             <Text style={geoModalStyles.buttonText}>Close</Text>
           </TouchableOpacity>
