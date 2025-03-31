@@ -1,57 +1,83 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Image, Button, Linking } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-
-type EventDetails = {
-  [key: string]: {
-    title: string;
-    description: string;
-  };
-};
-
-const eventDetails: EventDetails = {
-  '1': {
-    title: "Rudy's Poetry Contest",
-    description: "Rudy's Attic proudly presents its first annual poetry reading contest. Come see readings from talented local poets or sign up to compete for a chance to win terrific prizes!",
-  },
-  '2': {
-    title: "Shut Your Pie Hole (Eating Contest)",
-    description: "Join us to see who can tackle the most slices of our delicious pizza pies. You never lose with great pizza, but the best eater gets free slices for a year!",
-  },
-  '3': {
-    title: "Union Club Bar & Grill: Open Mic Nite",
-    description: "Calling all local talent for a fun-filled evening at the Union Club's Open Mic Nite. All talents welcome, so let's sing and dance the night away!",
-  },
-};
+import { Event } from "../data/EventsRepository";
+import { TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import eventStyles from "../styles/eventStyles"; // Assuming this has necessary styles
 
 const EventDescription = () => {
-  const { eventId } = useLocalSearchParams();
-  const event = eventDetails[eventId[0]] || { title: "Event Not Found", description: "No description available for this event." };
+  const searchParams = useLocalSearchParams();
+  const event = searchParams.event ? JSON.parse(searchParams.event as string) as Event : null;
+
+  if (!event) {
+    return (
+      <View style={eventStyles.container}>
+        <Text style={eventStyles.title}>Event Not Found</Text>
+        <Text style={eventStyles.description}>No details available for this event.</Text>
+      </View>
+    );
+  }
+
+  const {
+    EventName,
+    EventType,
+    EventDescription: description,
+    EventDateTime,
+    Address,
+    AgeRange,
+    SoberFriendly,
+    PrimaryImage,
+    SecondaryImages = [],
+  } = event;
+
+  const openInMaps = () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(Address)}`;
+    Linking.openURL(url);
+  };
+
+  const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{event.title}</Text>
-      <Text style={styles.description}>{event.description}</Text>
-    </View>
+    <ScrollView contentContainerStyle={eventStyles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={eventStyles.backButton}>
+      <Ionicons name="arrow-back" size={24} color="#333" />
+      <Text style={eventStyles.backText}>Back</Text>
+      </TouchableOpacity>
+      <Text style={eventStyles.title}>{EventName}</Text>
+      <Text style={eventStyles.subtitle}>{EventType}</Text>
+
+      {PrimaryImage && (
+        <Image source={{ uri: PrimaryImage }} style={eventStyles.primaryImage} />
+      )}
+
+      <Text style={eventStyles.sectionTitle}>Description</Text>
+      <Text style={eventStyles.description}>{description}</Text>
+
+      <Text style={eventStyles.sectionTitle}>Date & Time</Text>
+      <Text style={eventStyles.info}>{EventDateTime}</Text>
+
+      <Text style={eventStyles.sectionTitle}>Address</Text>
+      <Text style={eventStyles.info}>{Address}</Text>
+      <Button title="Open in Maps" onPress={openInMaps} />
+
+      <Text style={eventStyles.sectionTitle}>Details</Text>
+      <Text style={eventStyles.info}>Age Range: {AgeRange || "All ages"}</Text>
+      <Text style={eventStyles.info}>Sober Friendly: {SoberFriendly ? "Yes" : "No"}</Text>
+
+      {SecondaryImages.length > 0 && (
+        <>
+          <Text style={eventStyles.sectionTitle}>Gallery</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {SecondaryImages.map((url: string, index: number) => (
+              <Image key={index} source={{ uri: url }} style={eventStyles.secondaryImage} />
+            ))}
+          </ScrollView>
+        </>
+      )}
+    </ScrollView>
   );
 };
 
 export default EventDescription;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  description: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-});

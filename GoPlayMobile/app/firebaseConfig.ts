@@ -1,10 +1,10 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore"; 
 import secrets from "../secrets.json";
 
-console.log("🔥 Firebase Project ID:", process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID); 
+console.log("🔥 Firebase Project ID:", secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID);
 
-// Define the Firebase configuration object
+// Initialize Firebase only if no app is already initialized
 const firebaseConfig = {
   apiKey: secrets.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -14,9 +14,16 @@ const firebaseConfig = {
   appId: secrets.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase app
-const app = initializeApp(firebaseConfig);
+let app;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+  console.log("✅ Firebase initialized successfully.");
+} else {
+  app = getApp();
+  console.log("✅ Firebase app already initialized.");
+}
+
 const db = getFirestore(app);
 
-export { app, db }; 
-export default db; 
+export { app, db };
+export default app;
