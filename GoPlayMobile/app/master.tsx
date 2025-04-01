@@ -183,7 +183,11 @@ const Master = () => {
                 <TouchableOpacity onPress={() => handlePress(item)} style={masterStyles.textContainer}>
                   <Text style={masterStyles.locationText}>{item.EventName}</Text>
                 </TouchableOpacity>
-                <Button title="More Info" onPress={() => handleMoreInfo(item)} />
+                <Button 
+                  title="More Info" 
+                  onPress={() => handleMoreInfo(item)} 
+                  color="#20B2AA" 
+                />
               </View>
             )}
           />
