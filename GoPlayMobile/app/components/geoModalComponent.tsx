@@ -6,6 +6,7 @@ import { ParticipantEventRepository, ParticipantEventFactory } from "../data/Par
 import { Event } from "../data/EventsRepository";
 import { AttendanceTypes } from "../data/staticData";
 import { getDeviceId } from "../utils/getDeviceId";
+import { WebView } from 'react-native-webview'; 
 
 interface GeoModalComponentProps {
   event: Event | null;
@@ -61,15 +62,18 @@ const GeoModalComponent: React.FC<GeoModalComponentProps> = ({ event, onClose })
           {/* Event Title */}
           <Text style={geoModalStyles.title}>{event?.EventName}</Text>
 
-          {/* Primary Image */}
-          {event?.PrimaryImage && (
+          {/* Primary Media */}
+          {event?.videoLink ? (
+            <View style={geoModalStyles.video}>
+              <WebView
+                source={{ uri: event.videoLink }}
+                style={{ flex: 1 }}
+                allowsFullscreenVideo
+              />
+            </View>
+          ) : event?.PrimaryImage ? (
             <Image source={{ uri: event.PrimaryImage }} style={geoModalStyles.image} />
-          )}
-
-          {/* Description */}
-          {event?.EventDescription && (
-            <Text style={geoModalStyles.description}>{event.EventDescription}</Text>
-          )}
+          ) : null}
 
           {/* Address */}
           {event?.Address && (

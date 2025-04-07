@@ -1,4 +1,4 @@
-import { collection, doc, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 // Define the Event type
@@ -19,6 +19,7 @@ export interface Event {
   PrimaryImage: string;
   SecondaryImages: string[];
   RejectionReason: string;
+  videoLink: string;
 }
 
 // Repository to manage event data
@@ -32,10 +33,18 @@ export class EventsRepository {
   }
 
   // Fetch a specific event by its ID from the Firestore collection
-  async getEventById(eventId: number): Promise<Event | null> {
-    const querySnapshot = await getDocs(this.collectionRef);
-    const eventDoc = querySnapshot.docs.find(doc => (doc.data() as Event).EventID === eventId);
-    return eventDoc ? (eventDoc.data() as Event) : null;
+  async getEventById(eventId: string): Promise<Event | null> {
+    const q = query(this.collectionRef, where("EventID", "==", eventId));
+    const querySnapshot = await getDocs(q);
+  
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      console.log("✅ Event matched by EventID field:", doc.data());
+      return doc.data() as Event;
+    }
+  
+    console.warn("⚠️ No matching event found with EventID:", eventId);
+    return null;
   }
 }
 
