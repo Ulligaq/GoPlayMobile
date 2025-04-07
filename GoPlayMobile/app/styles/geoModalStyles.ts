@@ -48,6 +48,15 @@ export const geoModalStyles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 10,
   },
+
+  video: {
+    width: "100%",
+    height: 200,
+    marginBottom: 12,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
   description: {
     fontSize: 15,
     marginBottom: 10,
