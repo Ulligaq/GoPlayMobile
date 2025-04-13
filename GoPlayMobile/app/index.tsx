@@ -27,7 +27,7 @@ const SplashScreen = () => {
     <Animated.View style={[styles.screen, { opacity: fadeAnim }]}>
       <View style={styles.container}>
         <Text style={styles.futuraBoldsmall}>Welcome to</Text>
-        <Image source={require("../assets/images/goplaylogo.png")} style={styles.logo} />
+        <Image source={require("../assets/images/goplaylogo.png")} style={styles.logo} testID="splash-logo" />
         <Text style={styles.futuraBoldmedium}>Events Happening</Text>
         <Text style={styles.futuraBoldlarge}>NOW</Text>
       </View>
