@@ -28,13 +28,12 @@ const SNAP_TOP = -SCREEN_HEIGHT + 330;
 const SNAP_MID = -SCREEN_HEIGHT / 10; 
 const SNAP_BOTTOM = -SCREEN_HEIGHT + 856;
 
-const listRef = useRef<FlatList>(null);
-const scrollOffset = useRef(0);
-
 const Master = () => {
   // Reference to the MapView component
   const mapRef = useRef<MapView>(null);
 
+  const listRef = useRef<FlatList>(null); 
+  const scrollOffset = useRef(0);    
   // State to store the list of events
   const [events, setEvents] = useState<Event[]>([]);
 
