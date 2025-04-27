@@ -14,31 +14,32 @@ interface EventType {
 const PreferencesScreen = () => {
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "upcoming">("all");
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEventTypes = async () => {
+    const loadPreferencesAndEventTypes = async () => {
       try {
+        const storedTypes = await AsyncStorage.getItem("preferredEventTypes");
+        if (storedTypes) setSelectedTypes(JSON.parse(storedTypes));
+
+        const storedDateFilter = await AsyncStorage.getItem("preferredDateFilter");
+        if (storedDateFilter) setDateFilter(storedDateFilter as "all" | "today" | "upcoming");
+
         const db = getFirestore();
         const snapshot = await getDocs(collection(db, "EventType"));
         const types = snapshot.docs.map(doc => doc.data() as EventType);
         types.sort((a, b) => a.EventType.localeCompare(b.EventType));
         setEventTypes(types);
       } catch (error) {
-        console.error("Error fetching event types:", error);
+        console.error("Error loading preferences or fetching event types:", error);
       } finally {
         setLoading(false);
       }
     };
-  
-    const loadPreferences = async () => {
-      const stored = await AsyncStorage.getItem("preferredEventTypes");
-      if (stored) setSelectedTypes(JSON.parse(stored));
-    };
-  
-    fetchEventTypes();
-    loadPreferences();
+
+    loadPreferencesAndEventTypes();
   }, []);
 
   const toggleType = async (type: string) => {
@@ -51,6 +52,20 @@ const PreferencesScreen = () => {
     setSelectedTypes(updated);
     await AsyncStorage.setItem("preferredEventTypes", JSON.stringify(updated));
   };
+
+  const toggleDateFilter = async (value: "today" | "upcoming") => {
+    let updated: "all" | "today" | "upcoming";
+
+    if (dateFilter === value) {
+      updated = "all"; // Deselecting = show all
+    } else {
+      updated = value; // Switch to the selected option
+    }
+
+    setDateFilter(updated);
+    await AsyncStorage.setItem("preferredDateFilter", updated);
+  };
+
   if (loading) {
     return (
       <View style={masterStyles.screen}>
@@ -58,6 +73,7 @@ const PreferencesScreen = () => {
       </View>
     );
   }
+
   return (
     <View style={masterStyles.screen}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -79,6 +95,22 @@ const PreferencesScreen = () => {
           </View>
         )}
       />
+
+      <Text style={styles.header}>Filter By Date</Text>
+      <View style={styles.typeRow}>
+        <Text style={styles.label}>Today Only</Text>
+        <Switch
+          value={dateFilter === "today"}
+          onValueChange={() => toggleDateFilter("today")}
+        />
+      </View>
+      <View style={styles.typeRow}>
+        <Text style={styles.label}>Upcoming (Next 3 Weeks)</Text>
+        <Switch
+          value={dateFilter === "upcoming"}
+          onValueChange={() => toggleDateFilter("upcoming")}
+        />
+      </View>
     </View>
   );
 };

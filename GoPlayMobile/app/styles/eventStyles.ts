@@ -38,14 +38,15 @@ const eventStyles = StyleSheet.create({
     width: "100%",
     height: 180,
     borderRadius: 10,
-    resizeMode: "cover",
-    marginBottom: 12,
+    marginVertical: 10,
   },
   secondaryImage: {
-    width: 160,
-    height: 120,
-    borderRadius: 10,
+    width: 150,
+    height: 100,
     marginRight: 10,
+    borderRadius: 8,
+    resizeMode: "cover",
+    backgroundColor: "#ddd", // helps visually debug
   },
   backButton: {
     flexDirection: "row",
@@ -56,6 +57,15 @@ const eventStyles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 6,
     color: "#333",
+  },
+  videoContainer: {
+    width: "100%",
+    height: 200,
+    marginVertical: 10,
+  },
+  video: {
+    flex: 1,
+    borderRadius: 10,
   },
 });
 
