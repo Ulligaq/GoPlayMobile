@@ -20,6 +20,7 @@ export const masterStyles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 20,
+    overflow: "hidden",
   },
   typeBadge: {
     marginTop: 4,
