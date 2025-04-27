@@ -28,17 +28,23 @@ const SNAP_TOP = -SCREEN_HEIGHT + 330;
 const SNAP_MID = -SCREEN_HEIGHT / 10; 
 const SNAP_BOTTOM = -SCREEN_HEIGHT + 856;
 
+const listRef = useRef<FlatList>(null);
+const scrollOffset = useRef(0);
+
 const Master = () => {
   // Reference to the MapView component
   const mapRef = useRef<MapView>(null);
-
-  const listRef = useRef<FlatList>(null); 
-  const scrollOffset = useRef(0);    
+  
+  // Reference to the FlatList component
+  const isListAtTop = useSharedValue(true);
   // State to store the list of events
   const [events, setEvents] = useState<Event[]>([]);
 
   // Shared value for animated gesture handling
   const translateY = useSharedValue(0);
+
+  //Dynamic padding for event list so all entries are visible
+  const dynamicPaddingBottom = SCREEN_HEIGHT * 0.8;
 
   // Router for navigation
   const router = useRouter();
@@ -222,7 +228,11 @@ const Master = () => {
       </MapView>
 
       {/* Gesture handler for the animated list container */}
-      <PanGestureHandler onGestureEvent={gestureHandler}>
+      <PanGestureHandler 
+        onGestureEvent={gestureHandler}
+        onHandlerStateChange={gestureHandler}
+        simultaneousHandlers={listRef} // optional: avoids gesture conflicts
+      >
         <Animated.View style={[masterStyles.listContainer, animatedStyle]}>
           
           {/* Drag handle */}
@@ -248,6 +258,8 @@ const Master = () => {
             )}
             removeClippedSubviews={false}
             scrollEventThrottle={16}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={{ paddingBottom: dynamicPaddingBottom, paddingRight: 6 }}
             onScroll={(e) => {
               scrollOffset.current = e.nativeEvent.contentOffset.y;
             }}
